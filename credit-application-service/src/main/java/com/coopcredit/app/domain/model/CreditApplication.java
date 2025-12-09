@@ -3,6 +3,7 @@ package com.coopcredit.app.domain.model;
 import com.coopcredit.app.domain.model.enums.ApplicationStatus;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -26,14 +27,14 @@ public class CreditApplication {
             return BigDecimal.ZERO;
         }
 
-        BigDecimal monthlyRate = proposedRate.divide(BigDecimal.valueOf(100 * 12), 6, BigDecimal.ROUND_HALF_UP);
+        BigDecimal monthlyRate = proposedRate.divide(BigDecimal.valueOf(100 * 12), 6, RoundingMode.HALF_UP);
         BigDecimal onePlusRate = BigDecimal.ONE.add(monthlyRate);
         BigDecimal power = onePlusRate.pow(termMonths);
 
         BigDecimal numerator = requestedAmount.multiply(monthlyRate).multiply(power);
         BigDecimal denominator = power.subtract(BigDecimal.ONE);
 
-        return numerator.divide(denominator, 2, BigDecimal.ROUND_HALF_UP);
+        return numerator.divide(denominator, 2, RoundingMode.HALF_UP);
     }
 
     public void approve() {
