@@ -1,6 +1,5 @@
 package com.coopcredit.app.domain.model;
 
-import com.coopcredit.app.domain.model.CreditApplication;
 import com.coopcredit.app.domain.model.enums.ApplicationStatus;
 import org.junit.jupiter.api.Test;
 

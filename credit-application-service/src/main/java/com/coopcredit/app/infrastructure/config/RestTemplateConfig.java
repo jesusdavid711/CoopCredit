@@ -12,8 +12,6 @@ public class RestTemplateConfig {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder
-                .requestFactory(HttpComponentsClientHttpRequestFactory.class)
-                .build();
+        return builder.build();
     }
 }
