@@ -33,19 +33,19 @@ The system strictly follows the Ports and Adapters pattern:
 ```mermaid
 graph TD
     subgraph "Domain (Core)"
-        Model[Domain Models]
-        PortsIn[Input Ports<br>(Use Cases Interfaces)]
-        PortsOut[Output Ports<br>(Repository/External Interfaces)]
+        Model["Domain Models"]
+        PortsIn["Input Ports<br>(Use Cases Interfaces)"]
+        PortsOut["Output Ports<br>(Repository/External Interfaces)"]
     end
 
     subgraph "Application"
-        UseCases[Use Cases<br>(Implementation)]
+        UseCases["Use Cases<br>(Implementation)"]
     end
 
     subgraph "Infrastructure (Adapters)"
-        Controller[REST Controllers<br>(Input Adapter)]
-        JPA[JPA Repositories<br>(Output Adapter)]
-        RiskAdapter[Risk Central REST<br>(Output Adapter)]
+        Controller["REST Controllers<br>(Input Adapter)"]
+        JPA["JPA Repositories<br>(Output Adapter)"]
+        RiskAdapter["Risk Central REST<br>(Output Adapter)"]
     end
 
     Controller --> PortsIn
