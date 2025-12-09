@@ -1,7 +1,7 @@
 # 🏦 CoopCredit - Comprehensive Credit Application System
 
 ![Java](https://img.shields.io/badge/Java-17-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-green)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 ![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-purple)
 
@@ -60,7 +60,7 @@ graph TD
 ## 🛠️ Technologies
 
 *   **Language:** Java 17
-*   **Framework:** Spring Boot 3
+*   **Framework:** Spring Boot 3.5.7
 *   **Database:** PostgreSQL 15
 *   **Security:** Spring Security + JWT
 *   **Mapping:** MapStruct
@@ -85,13 +85,13 @@ graph TD
 
 2.  **Start the system:**
     ```bash
-    docker-compose up -d --build
+    docker compose up -d --build
     ```
 
 3.  **Verify services:**
     *   **Credit Service:** `http://localhost:8080/actuator/health`
     *   **Risk Service:** `http://localhost:8081/actuator/health`
-    *   **Swagger UI:** `http://localhost:8080/swagger-ui.html`
+    *   **Swagger UI:** `http://localhost:8080/swagger-ui/index.html`
 
 ### Option 2: Local Execution
 
@@ -120,24 +120,27 @@ The system implements 3 roles with specific permissions:
 
 **Test Users (created on startup):**
 *   **Admin:** `admin` / `admin123`
+*   **Analyst:** `analyst` / `analyst123`
+*   **Affiliate:** `affiliate` / `affiliate123`
 
 ---
 
 ## 📡 Main Endpoints
 
-Full documentation available in **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+Full documentation available in **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
 
 ### Authentication
 *   `POST /api/auth/register`: Register new user.
 *   `POST /api/auth/login`: Get JWT token.
 
 ### Affiliates
-*   `POST /api/affiliates`: Create affiliate (Admin).
+*   `POST /api/affiliates`: Create affiliate (Admin/Analyst only).
 *   `GET /api/affiliates/{id}`: Get detail.
 
 ### Applications
-*   `POST /api/applications`: Submit credit application.
-*   `POST /api/applications/{id}/evaluate`: Evaluate application (triggers risk engine).
+*   `POST /api/credit-applications`: Submit credit application.
+*   `POST /api/credit-applications/{id}/evaluate`: Evaluate application (triggers risk engine).
+*   `GET /api/credit-applications/affiliate/{affiliateId}`: Get applications by affiliate.
 
 ---
 
@@ -155,21 +158,21 @@ The file `CoopCredit.postman_collection.json` is located in the project root. Im
 
 ### Metrics and Logs
 *   **Metrics (Prometheus):** `http://localhost:8080/actuator/prometheus`
-*   **Logs:** Structured in console (view with `docker-compose logs -f`).
+*   **Logs:** Structured in console (view with `docker compose logs -f`).
 
 ### 📸 Evidence Screenshots
 
-#### 1. Postman Tests Success
-<!-- PASTE YOUR POSTMAN SUCCESS SCREENSHOT HERE -->
-*(Example: Screenshot showing 200 OK responses for Login and Credit Evaluation)*
+#### 1. Swagger UI
+*(Accessing API Documentation)*
+![Swagger UI](https://via.placeholder.com/800x400?text=Swagger+UI+Screenshot)
 
-#### 2. Grafana Dashboard
-<!-- PASTE YOUR GRAFANA DASHBOARD SCREENSHOT HERE -->
-*(Example: Screenshot showing JVM Memory and Request Count graphs)*
+#### 2. Postman Success
+*(Successful Login and Credit Evaluation)*
+![Postman Success](https://via.placeholder.com/800x400?text=Postman+Success+Screenshot)
 
 #### 3. Docker Containers Running
-<!-- PASTE YOUR 'docker ps' SCREENSHOT HERE -->
-*(Example: Screenshot of terminal showing all 5 containers UP)*
+*(All services healthy)*
+![Docker Containers](https://via.placeholder.com/800x400?text=Docker+Containers+Screenshot)
 
 ---
 
@@ -181,4 +184,4 @@ The file `CoopCredit.postman_collection.json` is located in the project root. Im
 *   ✅ Documentation (This README)
 
 ---
-**Developed by:** [Your Name]
+**Developed by:** Jesus David Castro
