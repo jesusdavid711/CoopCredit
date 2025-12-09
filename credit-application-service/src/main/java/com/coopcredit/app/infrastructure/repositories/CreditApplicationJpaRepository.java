@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CreditApplication JpaRepository extends JpaRepository<CreditApplicationEntity, Long> {
+public interface CreditApplicationJpaRepository extends JpaRepository<CreditApplicationEntity, Long> {
     List<CreditApplicationEntity> findByAffiliateId(Long affiliateId);
 }
