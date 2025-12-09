@@ -52,6 +52,18 @@ public class EvaluateCreditApplicationUseCaseImpl implements EvaluateCreditAppli
         var affiliate = affiliateRepository.findById(application.getAffiliateId())
                 .orElseThrow(() -> new BusinessValidationException("Affiliate not found"));
 
+        // Calculate debt-to-income ratio
+        BigDecimal monthlyPayment = application.calculateMonthlyPayment();
+        BigDecimal monthlyIncome = affiliate.getSalary();
+        BigDecimal debtToIncomeRatio = monthlyIncome.compareTo(BigDecimal.ZERO) == 0
+                ? BigDecimal.ZERO // Avoid division by zero
+                : monthlyPayment.divide(monthlyIncome, 4, RoundingMode.HALF_UP);
+
+        if (debtToIncomeRatio.compareTo(new BigDecimal("0.40")) > 0) {
+            application.reject("Debt-to-income ratio exceeds 40%");
+            return applicationRepository.save(application);
+        }
+
         RiskEvaluation riskEvaluation = riskCentralPort.evaluateRisk(
                 affiliate.getDocumentNumber(),
                 application.getRequestedAmount(),

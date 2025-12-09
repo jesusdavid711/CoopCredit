@@ -1,10 +1,10 @@
 package com.coopcredit.app.domain.model;
 
+import com.coopcredit.app.domain.model.CreditApplication;
 import com.coopcredit.app.domain.model.enums.ApplicationStatus;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
