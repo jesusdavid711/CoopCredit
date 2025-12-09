@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     ports:
-      - "5432:5432"
+      - "5440:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -64,6 +64,30 @@ services:
       retries: 5
       start_period: 60s
     restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: coopcredit-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - coopcredit-network
+    depends_on:
+      - credit-application-service
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: coopcredit-grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - coopcredit-network
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
 
 networks:
   coopcredit-network:

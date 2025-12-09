@@ -1,206 +1,184 @@
-# CoopCredit - Microservices Platform
+# 🏦 CoopCredit - Comprehensive Credit Application System
 
-Sistema de gestión de solicitudes de crédito con arquitectura hexagonal.
+![Java](https://img.shields.io/badge/Java-17-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-purple)
 
-## 🏗️ Arquitectura
+A modular and scalable system for automated credit management and evaluation, built with **Hexagonal Architecture**, **Microservices**, and **JWT Security**.
 
-- **credit-application-service** (Puerto 8080) - Servicio principal de aplicaciones de crédito
-- **risk-central-mock-service** (Puerto 8081) - Servicio de evaluación de riesgo
-- **PostgreSQL** (Puerto 5432) - Base de datos
+---
 
-## 🚀 Inicio Rápido con Docker
+## 📋 System Description
 
-### Prerequisitos
-- Docker 20+
-- Docker Compose 2+
+CoopCredit modernizes the credit process through two microservices:
 
-### Iniciar Todo el Sistema
+1.  **`credit-application-service`**: The core of the system. Manages affiliates, credit applications, security, and business rules.
+2.  **`risk-central-mock-service`**: Simulates an external risk bureau, returning consistent scores based on the document number.
 
-```bash
-# 1. Compilar ambos servicios
-cd risk-central-mock-service && mvn clean package -DskipTests
-cd ../credit-application-service && mvn clean package -DskipTests
-cd ..
+### 🚀 Key Features
+*   **Pure Hexagonal Architecture**: Domain isolated from frameworks.
+*   **Robust Security**: Stateless JWT, BCrypt, and Role-Based Access Control (RBAC).
+*   **Automated Evaluation**: Business rule engine (debt-to-income ratio, seniority, risk score).
+*   **Advanced Persistence**: JPA, Flyway for migrations, and full transactionality.
+*   **Observability**: Metrics with Actuator and Prometheus.
+*   **Containerization**: Multi-stage Dockerfiles and Docker Compose.
 
-# 2. Levantar todos los servicios
-docker-compose up -d
+---
 
-# 3. Ver logs
-docker-compose logs -f
+## 🏗️ Hexagonal Architecture
+
+The system strictly follows the Ports and Adapters pattern:
+
+```mermaid
+graph TD
+    subgraph "Domain (Core)"
+        Model[Domain Models]
+        PortsIn[Input Ports<br>(Use Cases Interfaces)]
+        PortsOut[Output Ports<br>(Repository/External Interfaces)]
+    end
+
+    subgraph "Application"
+        UseCases[Use Cases<br>(Implementation)]
+    end
+
+    subgraph "Infrastructure (Adapters)"
+        Controller[REST Controllers<br>(Input Adapter)]
+        JPA[JPA Repositories<br>(Output Adapter)]
+        RiskAdapter[Risk Central REST<br>(Output Adapter)]
+    end
+
+    Controller --> PortsIn
+    UseCases --> PortsOut
+    UseCases -.-> Model
+    JPA -.-> PortsOut
+    RiskAdapter -.-> PortsOut
 ```
 
-### Detener el Sistema
+---
 
-```bash
-docker-compose down
+## 🛠️ Technologies
 
-# Para eliminar también los datos de PostgreSQL
-docker-compose down -v
-```
+*   **Language:** Java 17
+*   **Framework:** Spring Boot 3
+*   **Database:** PostgreSQL 15
+*   **Security:** Spring Security + JWT
+*   **Mapping:** MapStruct
+*   **Testing:** JUnit 5, Mockito, Testcontainers
+*   **Deployment:** Docker & Docker Compose
 
-## 📍 Endpoints Principales
+---
 
-### Credit Application Service (8080)
-- **Swagger UI:** http://localhost:8080/swagger-ui.html
-- **API Docs:** http://localhost:8080/v3/api-docs
-- **Health:** http://localhost:8080/actuator/health
-- **Metrics:** http://localhost:8080/actuator/prometheus
+## 🚀 Execution Instructions
 
-### Risk Central Service (8081)
-- **Health:** http://localhost:8081/actuator/health
-- **Risk Evaluation:** POST http://localhost:8081/risk-evaluation
+### Prerequisites
+*   Docker and Docker Compose installed.
+*   Java 17 and Maven (optional, for local execution without Docker).
 
-## 🔐 Autenticación
+### Option 1: Docker Execution (Recommended)
 
-El sistema usa JWT. Para acceder a los endpoints protegidos:
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/jesusdavid711/CoopCredit.git
+    cd CoopCredit
+    ```
 
-1. **Registrar usuario:**
-```bash
-POST http://localhost:8080/api/auth/register
-{
-  "username": "admin",
-  "password": "admin123",
-  "role": "ROLE_ADMIN"
-}
-```
+2.  **Start the system:**
+    ```bash
+    docker-compose up -d --build
+    ```
 
-2. **Login (obtener token):**
-```bash
-POST http://localhost:8080/api/auth/login
-{
-  "username": "admin",
-  "password": "admin123"
-}
-```
+3.  **Verify services:**
+    *   **Credit Service:** `http://localhost:8080/actuator/health`
+    *   **Risk Service:** `http://localhost:8081/actuator/health`
+    *   **Swagger UI:** `http://localhost:8080/swagger-ui.html`
 
-3. **Usar el token en requests:**
-```
-Authorization: Bearer <token>
-```
+### Option 2: Local Execution
 
-## 🛠️ Desarrollo Local (sin Docker)
+1.  Start a PostgreSQL database.
+2.  Configure environment variables in `application.yml` or terminal.
+3.  Run services:
+    ```bash
+    # Terminal 1
+    cd risk-central-mock-service && mvn spring-boot:run
 
-### Prerequisitos
-- Java 17
-- Maven 3.8+
-- PostgreSQL 15
+    # Terminal 2
+    cd credit-application-service && mvn spring-boot:run
+    ```
 
-### 1. Iniciar PostgreSQL
+---
 
-```bash
-docker run -d \
-  --name postgres-dev \
-  -e POSTGRES_DB=coopcredit_db \
-  -e POSTGRES_USER=admin \
-  -e POSTGRES_PASSWORD=admin123 \
-  -p 5432:5432 \
-  postgres:15-alpine
-```
+## 🔐 Roles and Security
 
-### 2. Iniciar Risk Central Service
+The system implements 3 roles with specific permissions:
 
-```bash
-cd risk-central-mock-service
-mvn spring-boot:run
-```
+| Role | Permissions |
+| :--- | :--- |
+| **ROLE_ADMIN** | Full access. Can register affiliates and view all applications. |
+| **ROLE_ANALISTA** | Can view and manage applications in `PENDING` status. |
+| **ROLE_AFILIADO** | Can only view their own applications and data. |
 
-### 3. Iniciar Credit Application Service
+**Test Users (created on startup):**
+*   **Admin:** `admin` / `admin123`
 
-```bash
-cd credit-application-service
-mvn spring-boot:run
-```
+---
 
-## 📊 Base de Datos
+## 📡 Main Endpoints
 
-Las migraciones Flyway se ejecutan automáticamente al iniciar.
+Full documentation available in **Swagger UI**: `http://localhost:8080/swagger-ui.html`
 
-**Tablas creadas:**
-- `affiliates` - Afiliados
-- `credit_applications` - Solicitudes de crédito
-- `risk_evaluations` - Evaluaciones de riesgo
-- `users` - Usuarios del sistema
+### Authentication
+*   `POST /api/auth/register`: Register new user.
+*   `POST /api/auth/login`: Get JWT token.
 
-**Usuario inicial:**
-- Username: `admin`
-- Password: `admin123`
-- Role: `ROLE_ADMIN`
+### Affiliates
+*   `POST /api/affiliates`: Create affiliate (Admin).
+*   `GET /api/affiliates/{id}`: Get detail.
 
-## 🧪 Testing
+### Applications
+*   `POST /api/applications`: Submit credit application.
+*   `POST /api/applications/{id}/evaluate`: Evaluate application (triggers risk engine).
 
-```bash
-# Tests unitarios
-mvn test
+---
 
-# Tests de integración
-mvn verify
-```
+## 🧪 Testing and Evidence
 
-## 📦 Tecnologías
+### Postman Collection
+The file `CoopCredit.postman_collection.json` is located in the project root. Import it into Postman to test all flows.
 
-- **Spring Boot 3.5.7**
-- **Java 17**
-- **PostgreSQL 15**
-- **Maven**
-- **MapStruct** - Object mapping
-- **JWT** - Autenticación
-- **Flyway** - Migraciones
-- **Swagger/OpenAPI** - Documentación API
-- **Actuator + Prometheus** - Observabilidad
+### Credit Evaluation Flow
+1.  **Registration:** Affiliate requests credit. Status `PENDING`.
+2.  **Evaluation:** System queries `risk-central`.
+3.  **Decision:**
+    *   ✅ **APPROVED:** If Score > 300, Debt-to-Income < 40%, Seniority > 6 months.
+    *   ❌ **REJECTED:** If any rule fails.
 
-## 📁 Estructura del Proyecto
+### Metrics and Logs
+*   **Metrics (Prometheus):** `http://localhost:8080/actuator/prometheus`
+*   **Logs:** Structured in console (view with `docker-compose logs -f`).
 
-```
-CoopCredit/
-├── credit-application-service/     # Servicio principal
-│   ├── src/main/java/
-│   │   └── com/coopcredit/app/
-│   │       ├── domain/             # Lógica de negocio
-│   │       ├── application/        # Casos de uso
-│   │       └── infrastructure/     # Adaptadores
-│   └── src/main/resources/
-│       └── db/migration/           # Scripts SQL Flyway
-├── risk-central-mock-service/      # Servicio de riesgo
-└── docker-compose.yml              # Orquestación
-```
+### 📸 Evidence Screenshots
 
-## 🔧 Troubleshooting
+#### 1. Postman Tests Success
+<!-- PASTE YOUR POSTMAN SUCCESS SCREENSHOT HERE -->
+*(Example: Screenshot showing 200 OK responses for Login and Credit Evaluation)*
 
-### Puerto ya en uso
-```bash
-# Ver qué proceso usa el puerto
-lsof -i :8080
+#### 2. Grafana Dashboard
+<!-- PASTE YOUR GRAFANA DASHBOARD SCREENSHOT HERE -->
+*(Example: Screenshot showing JVM Memory and Request Count graphs)*
 
-# Matar proceso
-kill -9 <PID>
-```
+#### 3. Docker Containers Running
+<!-- PASTE YOUR 'docker ps' SCREENSHOT HERE -->
+*(Example: Screenshot of terminal showing all 5 containers UP)*
 
-### Limpiar containers y volúmenes
-```bash
-docker-compose down -v
-docker system prune -a
-```
+---
 
-### Reconstruir imágenes
-```bash
-docker-compose build --no-cache
-docker-compose up -d
-```
+## 📦 Deliverables
 
-## 👥 Contribuir
+*   ✅ Source Code (GitHub)
+*   ✅ Docker Compose
+*   ✅ Postman Collection
+*   ✅ Documentation (This README)
 
-1. Fork el proyecto
-2. Crea tu branch (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -m 'Add: nueva funcionalidad'`)
-4. Push al branch (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
-
-## 📝 Licencia
-
-Este proyecto es parte de un ejercicio académico de CoopCredit.
-
-## 🔗 Links Útiles
-
-- [Swagger UI](http://localhost:8080/swagger-ui.html)
-- [Actuator Health](http://localhost:8080/actuator/health)
-- [Prometheus Metrics](http://localhost:8080/actuator/prometheus)
+---
+**Developed by:** [Your Name]

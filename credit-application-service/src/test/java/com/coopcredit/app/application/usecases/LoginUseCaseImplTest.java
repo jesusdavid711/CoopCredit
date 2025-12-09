@@ -49,9 +49,10 @@ class LoginUseCaseImplTest {
         when(passwordEncoder.matches("password123", user.getPassword())).thenReturn(true);
         when(jwtService.generateToken("admin", "ROLE_ADMIN")).thenReturn(expectedToken);
 
-        String token = loginUseCase.execute("admin", "password123");
+        var result = loginUseCase.execute("admin", "password123");
 
-        assertEquals(expectedToken, token);
+        assertEquals(expectedToken, result.getToken());
+        assertEquals(user, result.getUser());
         verify(userRepository).findByUsername("admin");
         verify(passwordEncoder).matches("password123", user.getPassword());
         verify(jwtService).generateToken("admin", "ROLE_ADMIN");

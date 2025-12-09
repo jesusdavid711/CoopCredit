@@ -41,19 +41,31 @@ public class EvaluateCreditApplicationUseCaseImpl implements EvaluateCreditAppli
         this.affiliateRepository = affiliateRepository;
     }
 
+    /**
+     * Executes the credit application evaluation process.
+     * <p>
+     * This method orchestrates the following steps:
+     * 1. Validates existence of application and affiliate.
+     * 2. Calculates debt-to-income ratio (must be < 40%).
+     * 3. Validates maximum credit amount based on salary (max 5x).
+     * 4. Validates minimum seniority (6 months).
+     * 5. Calls external Risk Central service to get score.
+     * 6. Determines final status based on score and risk level.
+     * </p>
+     *
+     * @param applicationId The ID of the application to evaluate.
+     * @return The updated CreditApplication with the final status.
+     */
     @Override
     public CreditApplication execute(Long applicationId) {
+        // 1. Retrieve Application and Affiliate
         CreditApplication application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new ApplicationNotFoundException(applicationId));
-
-        if (!application.isPending()) {
-            throw new BusinessValidationException("Application has already been evaluated");
-        }
+                .orElseThrow(() -> new ApplicationNotFoundException("Application not found"));
 
         var affiliate = affiliateRepository.findById(application.getAffiliateId())
                 .orElseThrow(() -> new BusinessValidationException("Affiliate not found"));
 
-        // Calculate debt-to-income ratio
+        // 2. Policy: Debt-to-Income Ratio Check (< 40%)
         BigDecimal monthlyPayment = application.calculateMonthlyPayment();
         BigDecimal monthlyIncome = affiliate.getSalary();
         BigDecimal debtToIncomeRatio = monthlyIncome.compareTo(BigDecimal.ZERO) == 0
@@ -65,15 +77,43 @@ public class EvaluateCreditApplicationUseCaseImpl implements EvaluateCreditAppli
             return applicationRepository.save(application);
         }
 
+        // 3. Policy: Maximum Amount Check (5x Salary)
+        BigDecimal maxAmount = affiliate.getMaxCreditAmount(5);
+        if (application.getRequestedAmount().compareTo(maxAmount) > 0) {
+            application.reject("Amount exceeds maximum allowed based on salary");
+            return applicationRepository.save(application);
+        }
+
+        // 4. Policy: Minimum Seniority Check (6 months)
+        if (!affiliate.hasMinimumSeniority(6)) {
+            application.reject("Insufficient seniority (minimum 6 months required)");
+            return applicationRepository.save(application);
+        }
+
+        // 5. External Risk Evaluation
         RiskEvaluation riskEvaluation = riskCentralPort.evaluateRisk(
                 affiliate.getDocumentNumber(),
                 application.getRequestedAmount(),
                 application.getTermMonths());
 
+        // Persist the risk evaluation result
+        riskEvaluation.setCreditApplication(application);
         riskEvaluationRepository.save(riskEvaluation);
         application.setRiskEvaluation(riskEvaluation);
 
-        evaluateApplication(application, riskEvaluation);
+        // 6. Final Decision Logic based on Score
+        int score = riskEvaluation.getScore();
+        if (score >= 300) {
+            // Additional check for High Risk with large amounts
+            if (riskEvaluation.getRiskLevel() == RiskLevel.ALTO &&
+                    application.getRequestedAmount().compareTo(new BigDecimal("5000000")) > 0) {
+                application.reject("High risk level for requested amount");
+            } else {
+                application.approve();
+            }
+        } else {
+            application.reject("Credit score below minimum threshold");
+        }
 
         return applicationRepository.save(application);
     }

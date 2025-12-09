@@ -27,7 +27,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
     }
 
     @Override
-    public String execute(String username, String password) {
+    public com.coopcredit.app.domain.model.LoginResult execute(String username, String password) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(InvalidCredentialsException::new);
 
@@ -39,6 +39,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
             throw new InvalidCredentialsException();
         }
 
-        return jwtService.generateToken(user.getUsername(), user.getRole().name());
+        String token = jwtService.generateToken(user.getUsername(), user.getRole().name());
+        return new com.coopcredit.app.domain.model.LoginResult(token, user);
     }
 }

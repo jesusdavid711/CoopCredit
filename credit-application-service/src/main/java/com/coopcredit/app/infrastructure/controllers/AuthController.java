@@ -31,7 +31,7 @@ public class AuthController {
 
         User registeredUser = registerUserUseCase.execute(user);
 
-        String token = loginUseCase.execute(registeredUser.getUsername(), request.getPassword());
+        String token = loginUseCase.execute(registeredUser.getUsername(), request.getPassword()).getToken();
 
         return ResponseEntity
                 .ok(new AuthResponse(token, registeredUser.getUsername(), registeredUser.getRole().name()));
@@ -39,8 +39,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        String token = loginUseCase.execute(request.getUsername(), request.getPassword());
+        var loginResult = loginUseCase.execute(request.getUsername(), request.getPassword());
 
-        return ResponseEntity.ok(new AuthResponse(token, request.getUsername(), null));
+        return ResponseEntity.ok(new AuthResponse(
+                loginResult.getToken(),
+                loginResult.getUser().getUsername(),
+                loginResult.getUser().getRole().name()));
     }
 }

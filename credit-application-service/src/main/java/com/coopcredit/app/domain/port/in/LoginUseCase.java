@@ -1,5 +1,7 @@
 package com.coopcredit.app.domain.port.in;
 
+import com.coopcredit.app.domain.model.LoginResult;
+
 public interface LoginUseCase {
-    String execute(String username, String password);
+    LoginResult execute(String username, String password);
 }

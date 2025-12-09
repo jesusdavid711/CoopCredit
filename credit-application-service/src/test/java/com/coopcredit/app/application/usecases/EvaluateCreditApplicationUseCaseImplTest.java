@@ -103,7 +103,7 @@ class EvaluateCreditApplicationUseCaseImplTest {
         CreditApplication result = evaluateUseCase.execute(1L);
 
         assertEquals(ApplicationStatus.REJECTED, result.getStatus());
-        assertTrue(result.getRejectionReason().contains("exceeds limit for high-risk"));
+        assertTrue(result.getRejectionReason().contains("High risk level for requested amount"));
     }
 
     @Test

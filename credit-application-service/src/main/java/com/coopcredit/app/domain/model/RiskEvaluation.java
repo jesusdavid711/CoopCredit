@@ -13,6 +13,7 @@ public class RiskEvaluation {
     private RiskLevel riskLevel;
     private String detail;
     private LocalDateTime evaluationDate;
+    private CreditApplication creditApplication;
 
     public RiskEvaluation() {
     }
@@ -71,6 +72,14 @@ public class RiskEvaluation {
 
     public void setEvaluationDate(LocalDateTime evaluationDate) {
         this.evaluationDate = evaluationDate;
+    }
+
+    public CreditApplication getCreditApplication() {
+        return creditApplication;
+    }
+
+    public void setCreditApplication(CreditApplication creditApplication) {
+        this.creditApplication = creditApplication;
     }
 
     @Override

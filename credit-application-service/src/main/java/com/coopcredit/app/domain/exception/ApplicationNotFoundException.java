@@ -5,4 +5,8 @@ public class ApplicationNotFoundException extends RuntimeException {
     public ApplicationNotFoundException(Long id) {
         super("Credit application not found with id: " + id);
     }
+
+    public ApplicationNotFoundException(String message) {
+        super(message);
+    }
 }
