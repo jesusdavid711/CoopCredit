@@ -15,6 +15,7 @@ public interface AffiliateMapper {
     @Mapping(target = "applications", ignore = true)
     AffiliateEntity toEntity(Affiliate domain);
 
+    @Mapping(target = "id", ignore = true)
     Affiliate toDomain(AffiliateRequest request);
 
     AffiliateResponse toResponse(Affiliate domain);

@@ -12,4 +12,8 @@ public interface RiskEvaluationMapper {
 
     @Mapping(target = "creditApplication", ignore = true)
     RiskEvaluationEntity toEntity(RiskEvaluation domain);
+
+    @Mapping(target = "affiliateId", source = "affiliate.id")
+    com.coopcredit.app.domain.model.CreditApplication map(
+            com.coopcredit.app.infrastructure.entities.CreditApplicationEntity entity);
 }

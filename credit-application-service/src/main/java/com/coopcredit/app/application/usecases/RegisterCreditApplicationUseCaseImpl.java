@@ -69,7 +69,7 @@ public class RegisterCreditApplicationUseCaseImpl implements RegisterCreditAppli
 
     private void validateDebtToIncomeRatio(Affiliate affiliate, CreditApplication application) {
         BigDecimal monthlyPayment = application.calculateMonthlyPayment();
-        BigDecimal debtToIncomeRatio = monthlyPayment.divide(affiliate.getSalary(), 4, BigDecimal.ROUND_HALF_UP);
+        BigDecimal debtToIncomeRatio = monthlyPayment.divide(affiliate.getSalary(), 4, java.math.RoundingMode.HALF_UP);
 
         if (debtToIncomeRatio.compareTo(MAX_DEBT_TO_INCOME_RATIO) > 0) {
             throw new BusinessValidationException(

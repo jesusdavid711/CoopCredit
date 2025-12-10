@@ -17,6 +17,12 @@ public interface CreditApplicationMapper {
     @Mapping(target = "riskEvaluation", ignore = true)
     CreditApplicationEntity toEntity(CreditApplication domain);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "applicationDate", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "riskEvaluation", ignore = true)
+    @Mapping(target = "rejectionReason", ignore = true)
+    @Mapping(target = "affiliateId", source = "affiliateId")
     CreditApplication toDomain(CreditApplicationRequest request);
 
     @Mapping(target = "riskEvaluation.score", source = "riskEvaluation.score")
