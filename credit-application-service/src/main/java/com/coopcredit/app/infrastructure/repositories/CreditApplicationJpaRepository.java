@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface CreditApplicationJpaRepository extends JpaRepository<CreditApplicationEntity, Long> {
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "affiliate", "riskEvaluation" })
     List<CreditApplicationEntity> findByAffiliateId(Long affiliateId);
 }
